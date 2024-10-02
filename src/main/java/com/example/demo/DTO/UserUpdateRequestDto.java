@@ -1,10 +1,10 @@
-package DTO;
-
+package com.example.demo.DTO;
 import lombok.Getter;
 
 @Getter
-public class UserRegistrationRequestDto {
+public class UserUpdateRequestDto {
     private String username;
     private String password;
     private String name;
+    private String bio;
 }
