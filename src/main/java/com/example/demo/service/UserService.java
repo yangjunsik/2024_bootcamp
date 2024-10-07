@@ -9,6 +9,7 @@ import com.example.demo.DTO.UserDetailResponseDto;
 import com.example.demo.DTO.UserSimpleResponseDto;
 import com.example.demo.DTO.UserUpdateRequestDto;
 import com.example.demo.domain.User;
+import com.example.demo.repository.PostRepository;
 import com.example.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,11 +20,16 @@ import java.util.List;
 
 @Service
 public class UserService {
+
+    private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final ImageService imageService;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, ImageService imageService, PostRepository postRepository) {
         this.userRepository = userRepository;
+        this.imageService = imageService;
+        this.postRepository = postRepository;
     }
 
     public UserSimpleResponseDto saveUser(User newUser) {
@@ -37,11 +43,14 @@ public class UserService {
     }
 
     public UserSimpleResponseDto convertUserToSimpleDto(User currentUser, User targetUser) {
+        String imageUrl = targetUser.getImageUrl();
+        String imageData = imageService.encodeImageToBase64(System.getProperty("user.dir") + "/src/main/resources/static/" + imageUrl);
+
         return new UserSimpleResponseDto(
-                currentUser.getId(),
-                currentUser.getUsername(),
-                currentUser.getName(),
-                null,
+                targetUser.getId(),
+                targetUser.getUsername(),
+                targetUser.getName(),
+                imageData,
                 false
         );
     }
@@ -92,15 +101,19 @@ public class UserService {
     }
 
     public UserDetailResponseDto convertUserToDetailDto(User currentUser, User targetUser) {
+        String imageUrl = targetUser.getImageUrl();
+        String imageData = imageService.encodeImageToBase64(System.getProperty("user.dir") + "/src/main/resources/static/" + imageUrl);
+
+
         return new UserDetailResponseDto(
                 targetUser.getId(),
                 targetUser.getUsername(),
                 targetUser.getName(),
-                null,
+                imageData,
                 false,
                 targetUser.getBio(),
                 targetUser.getJoinedAt().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm")),
-                0L,
+                postRepository.countByUser(targetUser),
                 0L,
                 0L
         );
